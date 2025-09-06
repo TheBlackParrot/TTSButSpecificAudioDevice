@@ -27,6 +27,7 @@
     <ItemGroup>
       <PackageReference Include="NAudio" Version="2.2.1" />
       <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+      <PackageReference Include="NumericWordsConversion" Version="2.1.1" />
       <PackageReference Include="System.Speech" Version="10.0.0-preview.7.25380.108" />
     </ItemGroup>
 

@@ -1,6 +1,6 @@
 ﻿using System.Net;
-using System.Runtime.Versioning;
 using Newtonsoft.Json;
+using NumericWordsConversion;
 using TTSButSpecificAudioDevice;
 
 Config config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"))!;
@@ -45,7 +45,21 @@ await Task.Run(async () =>
 });
 return;
 
-static async Task HandleContext(HttpListenerContext context)
+static IEnumerable<string> SplitAlpha(string input)
+{
+    List<string> words = [string.Empty];
+    for (int i = 0; i < input.Length; i++)
+    {
+        words[^1] += input[i];
+        if (i + 1 < input.Length && char.IsLetter(input[i]) != char.IsLetter(input[i + 1]))
+        {
+            words.Add(string.Empty);
+        }
+    }
+    return words;
+}
+
+async Task HandleContext(HttpListenerContext context)
 {
     if (context.Request.HttpMethod != "POST")
     {
@@ -54,6 +68,31 @@ static async Task HandleContext(HttpListenerContext context)
 
     using StreamReader reader = new(context.Request.InputStream, context.Request.ContentEncoding);
     SpeechMessage speechMessage = JsonConvert.DeserializeObject<SpeechMessage>(await reader.ReadToEndAsync());
+    
+    string[] parts = speechMessage.Text.Split(" ");
+    List<string> output = [];
+    foreach (string part in parts)
+    {
+        output.AddRange(SplitAlpha(part));
+    }
+
+    for (int idx = 0; idx < output.Count; idx++)
+    {
+        if (!decimal.TryParse(output[idx], out decimal value))
+        {
+            continue;
+        }
+        
+        NumericWordsConverter numericWordsConverter = new(new NumericWordsConversionOptions
+        {
+            Culture = Culture.International,
+            DecimalSeparator = "point",
+            DecimalPlaces = value.Scale
+        });
+        
+        output[idx] = numericWordsConverter.ToWords(value);
+    }
+    speechMessage.Text = string.Join(" ", output);
     
     AudioPlaybackEngine.AddMessageToQueue(speechMessage);
 }

@@ -100,6 +100,7 @@ async Task HandleContext(HttpListenerContext context)
         }
     }
     speechMessage.Text = string.Join(" ", output);
+    Console.WriteLine($"[OUTPUT] {speechMessage.Text}");
     
     AudioPlaybackEngine.AddMessageToQueue(speechMessage);
 }

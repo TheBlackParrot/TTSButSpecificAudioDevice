@@ -1,0 +1,1 @@
+This is a simple HTTP server that listens for POST requests that fires off Windows-native TTS events (`System.Speech.Synthesis`) directed towards a user-defined audio device. ~~What a mouthful.~~

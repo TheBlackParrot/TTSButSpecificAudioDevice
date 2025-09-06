@@ -51,7 +51,7 @@ static IEnumerable<string> SplitAlpha(string input)
     for (int i = 0; i < input.Length; i++)
     {
         words[^1] += input[i];
-        if (i + 1 < input.Length && char.IsLetter(input[i]) != char.IsLetter(input[i + 1]))
+        if (i + 1 < input.Length && char.IsLetter(input[i]) != char.IsLetter(input[i + 1]) && char.IsPunctuation(input[i]) == char.IsPunctuation(input[i + 1]))
         {
             words.Add(string.Empty);
         }
@@ -78,7 +78,10 @@ async Task HandleContext(HttpListenerContext context)
 
     for (int idx = 0; idx < output.Count; idx++)
     {
-        if (!decimal.TryParse(output[idx], out decimal value))
+        char lastChar = output[idx].Last();
+        
+        string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!')));
+        if (!decimal.TryParse(wordNoPunctuation, out decimal value))
         {
             continue;
         }
@@ -91,6 +94,10 @@ async Task HandleContext(HttpListenerContext context)
         });
         
         output[idx] = numericWordsConverter.ToWords(value);
+        if (char.IsPunctuation(lastChar))
+        {
+            output[idx] = $"{output[idx]}{lastChar}";
+        }
     }
     speechMessage.Text = string.Join(" ", output);
     

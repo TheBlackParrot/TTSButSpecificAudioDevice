@@ -4,6 +4,7 @@ using NumericWordsConversion;
 using TTSButSpecificAudioDevice;
 
 Config config = JsonConvert.DeserializeObject<Config>(File.ReadAllText("config.json"))!;
+Dictionary<string, string> replacedWords = JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText("dict.json"))!;
 
 HttpListener listener = new()
 {
@@ -73,7 +74,18 @@ async Task HandleContext(HttpListenerContext context)
     List<string> output = [];
     foreach (string part in parts)
     {
-        output.AddRange(SplitAlpha(part));
+        if (replacedWords.TryGetValue(part, out string? replaced))
+        {
+            string[] replacedParts = replaced.Split(" ");
+            foreach (string replacedPart in replacedParts)
+            {
+                output.AddRange(SplitAlpha(replacedPart));
+            }
+        }
+        else
+        {
+            output.AddRange(SplitAlpha(part));   
+        }
     }
 
     for (int idx = 0; idx < output.Count; idx++)

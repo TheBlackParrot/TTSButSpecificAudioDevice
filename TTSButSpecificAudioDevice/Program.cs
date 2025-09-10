@@ -110,7 +110,12 @@ async Task HandleContext(HttpListenerContext context)
             DecimalPlaces = value.Scale
         });
         
-        output[idx] = numericWordsConverter.ToWords(value);
+        bool isNegative = value < 0;
+        output[idx] = numericWordsConverter.ToWords(Math.Abs(value));
+        if (isNegative)
+        {
+            output[idx] = $"negative {output[idx]}";
+        }
         if (char.IsPunctuation(lastChar))
         {
             output[idx] = $"{output[idx]}{lastChar}";

@@ -92,7 +92,7 @@ async Task HandleContext(HttpListenerContext context)
     {
         char lastChar = output[idx].Last();
         
-        string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!') && !c.Equals('-')));
+        string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!')));
         if (!decimal.TryParse(wordNoPunctuation, out decimal value))
         {
             continue;

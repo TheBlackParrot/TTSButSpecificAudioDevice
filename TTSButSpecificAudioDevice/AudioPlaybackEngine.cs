@@ -11,8 +11,11 @@ internal class AudioPlaybackEngine : IDisposable
 {
     private static readonly DirectSoundOut OutputDevice;
     private static readonly MixingSampleProvider Mixer;
-    private static readonly WaveFormat OutputFormat = new(22050, 1);
     private static readonly SpeechSynthesizer Synthesizer = new();
+    
+    private static readonly WaveFormat OutputFormat = new(22050, 1);
+    private static readonly WaveFormat IeeeFloatWaveFormat = WaveFormat.CreateIeeeFloatWaveFormat(OutputFormat.SampleRate, OutputFormat.Channels);
+    private static readonly SpeechAudioFormatInfo SpeechFormat = new(OutputFormat.SampleRate, AudioBitsPerSample.Sixteen, (AudioChannel)OutputFormat.Channels);
 
     private static readonly Dictionary<string, string> Voices = [];
 
@@ -57,7 +60,7 @@ internal class AudioPlaybackEngine : IDisposable
         }
         
         OutputDevice = new DirectSoundOut(guid);
-        Mixer = new MixingSampleProvider(WaveFormat.CreateIeeeFloatWaveFormat(22050, 1))
+        Mixer = new MixingSampleProvider(IeeeFloatWaveFormat)
         {
             ReadFully = true
         };
@@ -79,11 +82,18 @@ internal class AudioPlaybackEngine : IDisposable
         {
             return;
         }
-
+        
         _isPlaying = true;
-        ISampleProvider sample = SampleProviders[0];
-        SampleProviders.RemoveAt(0);
-        AddMixerInput(sample);
+        
+        try
+        {
+            Mixer.AddMixerInput(SampleProviders[0]);
+            SampleProviders.Remove(SampleProviders[0]);
+        }
+        catch (Exception)
+        {
+            _isPlaying = false;
+        }
     }
 
     public static void AddMessageToQueue(SpeechMessage speechMessage)
@@ -92,7 +102,7 @@ internal class AudioPlaybackEngine : IDisposable
         
         Synthesizer.SelectVoice(Voices[speechMessage.Voice]);
         Synthesizer.Rate = speechMessage.Rate ?? 0;
-        Synthesizer.SetOutputToAudioStream(memoryStream, new SpeechAudioFormatInfo(22050, AudioBitsPerSample.Sixteen, AudioChannel.Mono));
+        Synthesizer.SetOutputToAudioStream(memoryStream, SpeechFormat);
         Synthesizer.Speak(speechMessage.Text);
     
         byte[] buffer = memoryStream.ToArray();
@@ -104,11 +114,6 @@ internal class AudioPlaybackEngine : IDisposable
         {
             ProcessQueue();
         }
-    }
-
-    private static void AddMixerInput(ISampleProvider input)
-    {
-        Mixer.AddMixerInput(input);
     }
 
     public void Dispose()

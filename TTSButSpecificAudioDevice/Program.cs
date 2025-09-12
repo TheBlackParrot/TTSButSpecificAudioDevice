@@ -51,12 +51,17 @@ static IEnumerable<string> SplitAlpha(string input)
     List<string> words = [string.Empty];
     for (int i = 0; i < input.Length; i++)
     {
-        words[^1] += input[i];
-        if (input[i] == '-')
+        switch (input[i])
         {
-            continue;
+            case '%':
+                words.Add("percent");
+                break;
+            
+            default:
+                words[^1] += input[i];
+                break;
         }
-        
+
         if (i + 1 < input.Length && char.IsLetter(input[i]) != char.IsLetter(input[i + 1]) && char.IsPunctuation(input[i]) == char.IsPunctuation(input[i + 1]))
         {
             words.Add(string.Empty);

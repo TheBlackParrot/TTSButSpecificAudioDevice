@@ -54,16 +54,12 @@ internal class AudioPlaybackEngine : IDisposable
         bool tryParse = Guid.TryParse(config.AudioDeviceGuid, out Guid guid);
         if (!tryParse)
         {
-            Console.WriteLine($"Audio device {config.AudioDeviceGuid} not found, please use one of the GUIDs below:");
-            ListAudioDevices();
-            throw new Exception("Invalid audio device");
+            goto invalidAudioDevice;
         }
-
         // ReSharper disable once SimplifyLinqExpressionUseAll (wtf, isn't this the same???)
         if (!DirectSoundOut.Devices.Any(x => x.Guid == guid))
         {
-            ListAudioDevices();
-            throw new Exception("Invalid audio device");
+            goto invalidAudioDevice;
         }
         
         OutputDevice = new DirectSoundOut(guid);
@@ -81,6 +77,12 @@ internal class AudioPlaybackEngine : IDisposable
         
         OutputDevice.Init(Mixer);
         OutputDevice.Play();
+        return;
+        
+        invalidAudioDevice:
+            Console.WriteLine($"Audio device {config.AudioDeviceGuid} not found, please use one of the GUIDs below:");
+            ListAudioDevices();
+            throw new Exception("Invalid audio device");
     }
 
     private static void ProcessQueue()

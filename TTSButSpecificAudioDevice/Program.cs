@@ -78,7 +78,11 @@ async Task HandleContext(HttpListenerContext context)
     }
 
     using StreamReader reader = new(context.Request.InputStream, context.Request.ContentEncoding);
-    SpeechMessage speechMessage = JsonConvert.DeserializeObject<SpeechMessage>(await reader.ReadToEndAsync());
+    
+    string json = await reader.ReadToEndAsync();
+    json = json.Replace(@"\", @"\\");
+    
+    SpeechMessage speechMessage = JsonConvert.DeserializeObject<SpeechMessage>(json);
     
     string[] parts = speechMessage.Text.Split(" ");
     List<string> output = [];

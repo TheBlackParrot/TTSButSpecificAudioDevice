@@ -58,6 +58,13 @@ internal class AudioPlaybackEngine : IDisposable
             ListAudioDevices();
             throw new Exception("Invalid audio device");
         }
+
+        // ReSharper disable once SimplifyLinqExpressionUseAll (wtf, isn't this the same???)
+        if (!DirectSoundOut.Devices.Any(x => x.Guid == guid))
+        {
+            ListAudioDevices();
+            throw new Exception("Invalid audio device");
+        }
         
         OutputDevice = new DirectSoundOut(guid);
         Mixer = new MixingSampleProvider(IeeeFloatWaveFormat)

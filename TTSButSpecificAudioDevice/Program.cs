@@ -100,8 +100,16 @@ async Task HandleContext(HttpListenerContext context)
 
     for (int idx = 0; idx < output.Count; idx++)
     {
-        char lastChar = output[idx].Last();
-        
+        char lastChar;
+        try
+        {
+            lastChar = output[idx].Last();
+        }
+        catch (InvalidOperationException)
+        {
+            continue;
+        }
+
         string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!')));
         if (!decimal.TryParse(wordNoPunctuation, out decimal value))
         {

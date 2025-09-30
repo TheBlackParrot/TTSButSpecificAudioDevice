@@ -57,6 +57,10 @@ static IEnumerable<string> SplitAlpha(string input)
                 words.Add("percent");
                 break;
             
+            case ':':
+                words.Add(string.Empty);
+                continue;
+            
             default:
                 words[^1] += input[i];
                 break;

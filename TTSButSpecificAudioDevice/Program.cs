@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
 using Newtonsoft.Json;
 using NumericWordsConversion;
 using TTSButSpecificAudioDevice;
@@ -22,6 +23,19 @@ catch (System.Net.Sockets.SocketException)
 }
 
 AudioPlaybackEngine dummy = new();
+
+// doing my best using wikipedia here lol
+Dictionary<char, string[]> currencyWords = new()
+{
+    {'$', ["dollar", "cent"]},
+    {'\u20ac', ["euro", "cent"]},
+    {'\u00a3', ["pound", "pence"]},
+    {'\u20a4', ["pound", "pence"]},
+    {'\u20bd', ["ruble", "kopeck"]},
+    {'\u20b9', ["rupee", "paise"]},
+    {'\u00a5', ["yen"]},
+    {'\u00a4', ["scarab"]}
+};
 
 await Task.Run(async () =>
 {
@@ -118,29 +132,52 @@ async Task HandleContext(HttpListenerContext context)
             continue;
         }
 
-        string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!')));
+        string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!') && !char.IsSymbol(c)));
         if (!decimal.TryParse(wordNoPunctuation, out decimal value))
         {
             continue;
         }
+
+        dynamic numericWordsConverter;
+        if (char.IsSymbol(output[idx].First()))
+        {
+            if (currencyWords.TryGetValue(output[idx].First(), out string[]? currency))
+            {
+                bool plural = (int)value != 1;
+                bool subIsPlural = ((int)(value * 100) % 100) != 1;
+                numericWordsConverter = new CurrencyWordsConverter(new CurrencyWordsConversionOptions
+                {
+                    Culture = Culture.International,
+                    OutputFormat = OutputFormat.English,
+                    DecimalSeparator = "point",
+                    DecimalPlaces = value.Scale,
+                    CurrencyUnit = plural ? $"{currency[0]}s" : currency[0],
+                    EndOfWordsMarker = "",
+                    SubCurrencyUnit = currency.Length > 1 ? (subIsPlural ? $"{currency[1]}s" : currency[1]) : ""
+                });
+                
+                goto finishConverting;
+            }
+        }
         
-        NumericWordsConverter numericWordsConverter = new(new NumericWordsConversionOptions
+        numericWordsConverter = new NumericWordsConverter(new NumericWordsConversionOptions
         {
             Culture = Culture.International,
             DecimalSeparator = "point",
             DecimalPlaces = value.Scale
         });
         
-        bool isNegative = value < 0;
-        output[idx] = numericWordsConverter.ToWords(Math.Abs(value));
-        if (isNegative)
-        {
-            output[idx] = $"negative {output[idx]}";
-        }
-        if (char.IsPunctuation(lastChar))
-        {
-            output[idx] = $"{output[idx]}{lastChar}";
-        }
+        finishConverting:
+            bool isNegative = value < 0;
+            output[idx] = numericWordsConverter.ToWords(Math.Abs(value));
+            if (isNegative)
+            {
+                output[idx] = $"negative {output[idx]}";
+            }
+            if (char.IsPunctuation(lastChar))
+            {
+                output[idx] = $"{output[idx]}{lastChar}";
+            }
     }
     speechMessage.Text = string.Join(" ", output);
     Console.WriteLine($"[OUTPUT] {speechMessage.Text}");

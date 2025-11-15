@@ -217,5 +217,5 @@ internal struct SpeechMessage
     [JsonProperty("text")] public string Text { get; set; }
     
     [DefaultValue(0)]
-    [JsonProperty("rate")] public int Rate { get; set; }
+    [JsonProperty("rate")] public float Rate { get; set; }
 }

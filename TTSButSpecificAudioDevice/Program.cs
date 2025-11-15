@@ -145,7 +145,7 @@ async Task HandleContext(HttpListenerContext context)
             {
                 bool plural = (int)value != 1;
                 bool subIsPlural = ((int)(value * 100) % 100) != 1;
-                numericWordsConverter = new CurrencyWordsConverter(new CurrencyWordsConversionOptions
+                CurrencyWordsConversionOptions options = new()
                 {
                     Culture = Culture.International,
                     OutputFormat = OutputFormat.English,
@@ -154,22 +154,47 @@ async Task HandleContext(HttpListenerContext context)
                     CurrencyUnit = plural ? $"{currency[0]}s" : currency[0],
                     EndOfWordsMarker = "",
                     SubCurrencyUnit = currency.Length > 1 ? (subIsPlural ? $"{currency[1]}s" : currency[1]) : ""
-                });
+                };
+                if (value.Scale <= 0)
+                {
+                    // working around a FormatException when the value in question is whole
+                    options = new CurrencyWordsConversionOptions
+                    {
+                        Culture = Culture.International,
+                        OutputFormat = OutputFormat.English,
+                        CurrencyUnit = plural ? $"{currency[0]}s" : currency[0],
+                        EndOfWordsMarker = "",
+                        SubCurrencyUnit = currency.Length > 1 ? (subIsPlural ? $"{currency[1]}s" : currency[1]) : ""
+                    }; 
+                }
+                numericWordsConverter = new CurrencyWordsConverter(options);
                 
                 goto finishConverting;
             }
         }
         
-        numericWordsConverter = new NumericWordsConverter(new NumericWordsConversionOptions
-        {
-            Culture = Culture.International,
-            DecimalSeparator = "point",
-            DecimalPlaces = value.Scale
-        });
+        fallback:
+            numericWordsConverter = new NumericWordsConverter(new NumericWordsConversionOptions
+            {
+                Culture = Culture.International,
+                DecimalSeparator = "point",
+                DecimalPlaces = value.Scale
+            });
         
         finishConverting:
             bool isNegative = value < 0;
-            output[idx] = numericWordsConverter.ToWords(Math.Abs(value));
+            try
+            {
+                output[idx] = numericWordsConverter.ToWords(Math.Abs(value));
+            }
+            catch (FormatException)
+            {
+                if (numericWordsConverter is CurrencyWordsConverter)
+                {
+                    goto fallback;
+                }
+            }
+
             if (isNegative)
             {
                 output[idx] = $"negative {output[idx]}";

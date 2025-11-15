@@ -110,7 +110,7 @@ internal class AudioPlaybackEngine : IDisposable
         using MemoryStream memoryStream = new();
         
         Synthesizer.SelectVoice(Voices[speechMessage.Voice]);
-        Synthesizer.Rate = speechMessage.Rate ?? 0;
+        Synthesizer.Rate = speechMessage.Rate;
         Synthesizer.SetOutputToAudioStream(memoryStream, SpeechFormat);
         Synthesizer.Speak(speechMessage.Text);
     

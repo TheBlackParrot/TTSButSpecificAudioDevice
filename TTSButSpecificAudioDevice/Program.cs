@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+﻿using System.ComponentModel;
 using System.Net;
 using Newtonsoft.Json;
 using NumericWordsConversion;
@@ -215,5 +215,7 @@ internal struct SpeechMessage
 {
     [JsonProperty("voice")] public string Voice { get; set; }
     [JsonProperty("text")] public string Text { get; set; }
-    [JsonProperty("rate")] public int? Rate { get; set; }
+    
+    [DefaultValue(0)]
+    [JsonProperty("rate")] public int Rate { get; set; }
 }

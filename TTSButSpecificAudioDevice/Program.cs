@@ -101,6 +101,11 @@ static IEnumerable<string> SplitAlpha(string input)
                 }
                 break;
             
+            case '/':
+                words.Add("slash");
+                words.Add(string.Empty);
+                break;
+            
             default:
                 words[^1] += input[i];
                 break;

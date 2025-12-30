@@ -64,6 +64,8 @@ return;
 static IEnumerable<string> SplitAlpha(string input)
 {
     List<string> words = [string.Empty];
+    bool parseDecimalsAsDots = input.Count(x => x == '.') > 1;
+    
     for (int i = 0; i < input.Length; i++)
     {
         switch (input[i])
@@ -87,12 +89,29 @@ static IEnumerable<string> SplitAlpha(string input)
                 }
                 break;
             
+            case '.':
+                if (parseDecimalsAsDots)
+                {
+                    // not a decimal number, it's something else
+                    words.Add("dot");
+                }
+                else
+                {
+                    words[^1] += input[i];
+                }
+                break;
+            
             default:
                 words[^1] += input[i];
                 break;
         }
 
         if (i + 1 < input.Length && char.IsLetter(input[i]) != char.IsLetter(input[i + 1]) && char.IsPunctuation(input[i]) == char.IsPunctuation(input[i + 1]))
+        {
+            words.Add(string.Empty);
+        }
+        
+        if (parseDecimalsAsDots && input[i] == '.')
         {
             words.Add(string.Empty);
         }

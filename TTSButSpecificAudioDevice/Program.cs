@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using System.Net;
 using Newtonsoft.Json;
 using NumericWordsConversion;
@@ -144,9 +145,44 @@ async Task HandleContext(HttpListenerContext context)
         }
 
         string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!') && !char.IsSymbol(c)));
-        if (!decimal.TryParse(wordNoPunctuation, out decimal value))
+        
+        decimal? checkedValue = null;
+        try
+        {
+            checkedValue = decimal.Parse(wordNoPunctuation);
+        } catch (Exception exception)
+        {
+            if (exception is OverflowException)
+            {
+                checkedValue = decimal.MaxValue;
+            }
+        }
+
+        if (checkedValue == null)
         {
             continue;
+        }
+        decimal value = checkedValue.Value;
+        
+        string separatedNumber = Math.Round(value).ToString("N0", CultureInfo.InvariantCulture);
+        
+        if (value >= config.StartEstimatingNumbersAt || value <= config.StartEstimatingNumbersAt * -1)
+        {
+            output.Insert(idx, "about");
+            idx++;
+            
+            string[] numberParts = separatedNumber.Split(",");
+            for(int numberPartIdx = 0; numberPartIdx < numberParts.Length; numberPartIdx++)
+            {
+                if (numberPartIdx == 0)
+                {
+                    continue;
+                }
+
+                numberParts[numberPartIdx] = "000";
+            }
+
+            value = decimal.Parse(string.Join(string.Empty, numberParts));
         }
 
         dynamic numericWordsConverter;

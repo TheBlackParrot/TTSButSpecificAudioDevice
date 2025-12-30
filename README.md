@@ -7,6 +7,7 @@ This is a simple HTTP server that listens for POST requests that fires off Windo
   - To add or remove voices, check *Installed voice packages* in your Speech settings.
 - Numbers are rounded off to the most important section of the number past the value defined for `StartEstimatingNumbersAt`
   - *e.g. `1398124550769.5` will be synthesized as `about one trillion` if `StartEstimatingNumbersAt` is `1000000000000`*
+  - Setting `StartEstimatingNumbersAt` to anything below `1000` will disable number estimation and will synthesize numbers as they are
 
 ```json
 {

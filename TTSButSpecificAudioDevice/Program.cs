@@ -154,7 +154,7 @@ async Task HandleContext(HttpListenerContext context)
         {
             if (exception is OverflowException)
             {
-                checkedValue = decimal.MaxValue;
+                checkedValue = wordNoPunctuation[0].ToString() == "-" ? decimal.MinValue : decimal.MaxValue;
             }
         }
 

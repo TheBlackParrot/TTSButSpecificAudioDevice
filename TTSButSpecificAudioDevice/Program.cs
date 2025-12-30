@@ -164,14 +164,12 @@ async Task HandleContext(HttpListenerContext context)
             }
         }
         
-        string separatedNumber = Math.Round(value).ToString("N0", CultureInfo.InvariantCulture);
-        
         if (value >= config.StartEstimatingNumbersAt || value <= config.StartEstimatingNumbersAt * -1)
         {
             output.Insert(idx, "about");
             idx++;
             
-            string[] numberParts = separatedNumber.Split(",");
+            string[] numberParts = Math.Round(value).ToString("N0", CultureInfo.InvariantCulture).Split(",");
             for(int numberPartIdx = 0; numberPartIdx < numberParts.Length; numberPartIdx++)
             {
                 if (numberPartIdx == 0)

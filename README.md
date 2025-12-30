@@ -7,7 +7,8 @@ This is a simple HTTP server that listens for POST requests that fires off Windo
 {
   "HttpAddress": "127.0.0.1",
   "HttpPort": 6968,
-  "AudioDeviceGuid": "01234567-89ab-cdef-0123-456789abcdef"
+  "AudioDeviceGuid": "01234567-89ab-cdef-0123-456789abcdef",
+  "StartEstimatingNumbersAt": 1000000000
 }
 ```
 - The voices listed out on program startup are the system's available voices, along with the associated region.

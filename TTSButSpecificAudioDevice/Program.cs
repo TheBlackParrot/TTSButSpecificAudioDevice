@@ -75,6 +75,17 @@ static IEnumerable<string> SplitAlpha(string input)
                 words.Add(string.Empty);
                 continue;
             
+            case '-':
+                if (i == 0)
+                {
+                    words[^1] += input[i];
+                }
+                else
+                {
+                    words.Add(string.Empty);
+                }
+                break;
+            
             default:
                 words[^1] += input[i];
                 break;

@@ -188,8 +188,14 @@ async Task HandleContext(HttpListenerContext context)
         {
             if (currencyWords.TryGetValue(output[idx].First(), out string[]? currency))
             {
-                bool plural = (int)value != 1;
-                bool subIsPlural = ((int)(value * 100) % 100) != 1;
+                bool plural = value != 1;
+                bool subIsPlural = false;
+                if (value % 1 != 0)
+                {
+                    decimal subValue = (value % 1) * 100;
+                    subIsPlural = subValue != 1;
+                }
+                
                 CurrencyWordsConversionOptions options = new()
                 {
                     Culture = Culture.International,

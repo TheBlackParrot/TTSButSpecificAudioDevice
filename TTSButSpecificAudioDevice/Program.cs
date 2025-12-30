@@ -288,7 +288,7 @@ async Task HandleContext(HttpListenerContext context)
 [JsonObject(MemberSerialization.OptIn)]
 internal struct SpeechMessage
 {
-    [JsonProperty("voice")] public string Voice { get; set; }
+    [JsonProperty("voice")] public string? Voice { get; set; }
     [JsonProperty("text")] public string Text { get; set; }
     
     [DefaultValue(0)]

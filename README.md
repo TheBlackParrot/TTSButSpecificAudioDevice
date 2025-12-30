@@ -25,4 +25,6 @@ The program expects data to be JSON formatted:
   "rate": 0
 }
 ```
-`voice` and `text` are the only required keys. `rate` controls the speed of the synthesized speech output, with `0` being the default speed.
+- `voice` sets which voice to synthesize the text as
+- `text` *(required)* is the text to synthesize into speech
+- `rate` controls the speed of the synthesized speech output, with `0` being the default speed.

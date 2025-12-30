@@ -22,6 +22,8 @@ internal class AudioPlaybackEngine : IDisposable
     private static readonly List<ISampleProvider> SampleProviders = [];
     private static bool _isPlaying;
     
+    private static string _defaultVoice = string.Empty;
+    
     private static void ListAudioDevices()
     {
         foreach (DirectSoundDeviceInfo dev in DirectSoundOut.Devices)
@@ -42,6 +44,11 @@ internal class AudioPlaybackEngine : IDisposable
             
             Voices[name] = voice.VoiceInfo.Name;
             Console.WriteLine($"{name} ({voice.VoiceInfo.Culture})");
+            
+            if (string.IsNullOrEmpty(_defaultVoice))
+            {
+                _defaultVoice = name;
+            }
         }
     }
 
@@ -109,7 +116,7 @@ internal class AudioPlaybackEngine : IDisposable
     {
         using MemoryStream memoryStream = new();
         
-        Synthesizer.SelectVoice(Voices[speechMessage.Voice]);
+        Synthesizer.SelectVoice(Voices[speechMessage.Voice ?? _defaultVoice]);
         Synthesizer.Rate = (int)speechMessage.Rate;
         Synthesizer.SetOutputToAudioStream(memoryStream, SpeechFormat);
         Synthesizer.Speak(speechMessage.Text);

@@ -187,24 +187,27 @@ async Task HandleContext(HttpListenerContext context)
                 continue;
             }
         }
-        
-        if (value >= config.StartEstimatingNumbersAt || value <= config.StartEstimatingNumbersAt * -1)
+
+        if (config.StartEstimatingNumbersAt >= 1000)
         {
-            output.Insert(idx, "about");
-            idx++;
-            
-            string[] numberParts = Math.Round(value).ToString("N0", CultureInfo.InvariantCulture).Split(",");
-            for(int numberPartIdx = 0; numberPartIdx < numberParts.Length; numberPartIdx++)
+            if (value >= config.StartEstimatingNumbersAt || value <= config.StartEstimatingNumbersAt * -1)
             {
-                if (numberPartIdx == 0)
+                output.Insert(idx, "about");
+                idx++;
+
+                string[] numberParts = Math.Round(value).ToString("N0", CultureInfo.InvariantCulture).Split(",");
+                for (int numberPartIdx = 0; numberPartIdx < numberParts.Length; numberPartIdx++)
                 {
-                    continue;
+                    if (numberPartIdx == 0)
+                    {
+                        continue;
+                    }
+
+                    numberParts[numberPartIdx] = "000";
                 }
 
-                numberParts[numberPartIdx] = "000";
+                value = decimal.Parse(string.Join(string.Empty, numberParts));
             }
-
-            value = decimal.Parse(string.Join(string.Empty, numberParts));
         }
 
         dynamic numericWordsConverter;

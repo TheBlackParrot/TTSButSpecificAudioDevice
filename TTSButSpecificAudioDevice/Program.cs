@@ -146,23 +146,23 @@ async Task HandleContext(HttpListenerContext context)
 
         string wordNoPunctuation = string.Join("", output[idx].Where(c => !c.Equals('?') && !c.Equals('!') && !char.IsSymbol(c)));
         
-        decimal? checkedValue = null;
+        decimal value;
         try
         {
-            checkedValue = decimal.Parse(wordNoPunctuation);
-        } catch (Exception exception)
+            value = decimal.Parse(wordNoPunctuation);
+        }
+        catch (Exception exception)
         {
             if (exception is OverflowException)
             {
-                checkedValue = wordNoPunctuation[0].ToString() == "-" ? decimal.MinValue : decimal.MaxValue;
+                value = wordNoPunctuation[0].ToString() == "-" ? decimal.MinValue : decimal.MaxValue;
+            }
+            else
+            {
+                // not a number
+                continue;
             }
         }
-
-        if (checkedValue == null)
-        {
-            continue;
-        }
-        decimal value = checkedValue.Value;
         
         string separatedNumber = Math.Round(value).ToString("N0", CultureInfo.InvariantCulture);
         

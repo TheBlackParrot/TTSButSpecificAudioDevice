@@ -20,11 +20,13 @@ Send out an HTTP POST request to the address and port the program is listening o
 The program expects data to be JSON formatted:
 ```json
 {
-  "voice": "Mark",
   "text": "Hello, world!",
+  "voice": "Mark",
   "rate": 0
 }
 ```
-- `voice` sets which voice to synthesize the text as
-- `text` *(required)* is the text to synthesize into speech
-- `rate` controls the speed of the synthesized speech output, with `0` being the default speed.
+| Parameter  | Required | Type               | Description                            |
+|------------|----------|--------------------|----------------------------------------|
+| `text`     | Yes      | `string`           | Text to synthesize into speech         |
+| `voice`    | No       | `string`           | Voice to synthesize `text` as          |
+| `rate`     | No       | `float <-10 - 10>` | Speed of the synthesized speech output |

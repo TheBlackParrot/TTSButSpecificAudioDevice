@@ -92,6 +92,24 @@ static IEnumerable<string> SplitAlpha(string input)
             case '.':
                 if (parseDecimalsAsDots)
                 {
+                    if (i + 1 < input.Length)
+                    {
+                        if (input[i + 1] == '.')
+                        {
+                            // string of dots, ignore it
+                            continue;
+                        }
+                    }
+
+                    if (i > 0)
+                    {
+                        if (input[i - 1] == '.')
+                        {
+                            // final dot in the string of dots, ignore it
+                            continue;
+                        }
+                    }
+                    
                     // not a decimal number, it's something else
                     words.Add("dot");
                 }
